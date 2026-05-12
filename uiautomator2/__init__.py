@@ -31,6 +31,7 @@ from uiautomator2.settings import Settings
 from uiautomator2.swipe import SwipeExt
 from uiautomator2.utils import deprecated, image_convert, list2cmdline
 from uiautomator2.watcher import WatchContext, Watcher
+from uiautomator2.rish import RishDevice, connect_rish
 
 WAIT_FOR_DEVICE_TIMEOUT = int(os.getenv("WAIT_FOR_DEVICE_TIMEOUT", 20))
 
@@ -952,7 +953,16 @@ def connect(serial: Union[str, adbutils.AdbDevice] = None) -> Device:
     Example:
         connect("10.0.0.1:5555")
         connect("cff1123ea")  # adb device serial number
+        connect("rish://")  # local Shizuku/rish backend
     """
+    backend = os.getenv("U2_BACKEND") or os.getenv("UIAUTOMATOR2_BACKEND")
+    if backend == "rish":
+        return connect_rish()
+    if serial in ("rish", "rish://"):
+        return connect_rish()
+    if isinstance(serial, str) and serial.startswith("rish://"):
+        rish_path = serial[len("rish://"):] or None
+        return connect_rish(rish_path)
     if not serial:
         serial = os.getenv("ANDROID_SERIAL")
     return connect_usb(serial)

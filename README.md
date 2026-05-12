@@ -119,6 +119,29 @@ dev = adbutils.device(transport_id=6)
 d = u2.connect(dev)
 ```
 
+Method 4: Same-phone Termux automation through Shizuku/rish, without ADB:
+
+```python
+import uiautomator2 as u2
+
+d = u2.connect_rish()
+# Equivalent forms:
+# d = u2.connect("rish://")
+# U2_BACKEND=rish python your_script.py
+
+print(d.dump_hierarchy()[:200])
+d(text="OK").click()
+d.press("back")
+```
+
+The rish backend is a local Shizuku shell transport. It supports the
+uiautomator2-style subset needed for same-device automation: `shell`,
+`dump_hierarchy`, `click`, `long_click`, `swipe`, `press`, `screenshot`,
+`app_current`, exact/contains/matches selectors for XML attributes, element
+`wait`, `exists`, `info`, `click`, and simple scroll helpers. It does not start
+the upstream atx-agent/uiautomator2 JSON-RPC server, so advanced JSON-RPC-only
+features are intentionally unsupported.
+
 ## Operating Elements with XPath
 
 What is XPath:
