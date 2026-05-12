@@ -1,5 +1,5 @@
 from uiautomator2.abstract import ShellResponse
-from uiautomator2.rish import RishDevice
+from uiautomator2.rish import RishDevice, connect_rish_shell
 
 
 SAMPLE_XML = """<?xml version='1.0' encoding='UTF-8' standalone='yes' ?>
@@ -53,3 +53,10 @@ def test_rish_selector_contains_and_resource_id():
 
     assert device(textContains="Throughput").exists
     assert device(resourceId="android:id/text1").info["text"] == "Throughput test (128 bytes)"
+
+
+def test_connect_rish_shell_returns_lightweight_backend():
+    runner = FakeRunner()
+    device = connect_rish_shell(rish="/data/data/com.termux/files/usr/bin/sh", runner=runner)
+    assert isinstance(device, RishDevice)
+    assert device(text="OK").exists

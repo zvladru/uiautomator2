@@ -134,13 +134,19 @@ d(text="OK").click()
 d.press("back")
 ```
 
-The rish backend is a local Shizuku shell transport. It supports the
-uiautomator2-style subset needed for same-device automation: `shell`,
-`dump_hierarchy`, `click`, `long_click`, `swipe`, `press`, `screenshot`,
-`app_current`, exact/contains/matches selectors for XML attributes, element
-`wait`, `exists`, `info`, `click`, and simple scroll helpers. It does not start
-the upstream atx-agent/uiautomator2 JSON-RPC server, so advanced JSON-RPC-only
-features are intentionally unsupported.
+The default rish backend starts the real `u2.jar` uiautomator2 JSON-RPC server
+through Shizuku/rish, then talks to it directly on `127.0.0.1:9008`. That means
+standard calls such as `d.info`, `d.dump_hierarchy()`, `d(text=...).info`,
+`d(text=...).click()`, `d.swipe(...)`, `d.press(...)`, screenshots, toast and
+clipboard JSON-RPC calls use the same device-side server as the ADB backend.
+
+For emergency fallback without the JSON-RPC server:
+
+```python
+d = u2.connect_rish(jsonrpc=False)
+```
+
+The fallback implements only shell/XML/input helpers.
 
 ## Operating Elements with XPath
 
