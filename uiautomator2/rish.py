@@ -714,10 +714,7 @@ class RishUiautomatorServer:
             if self._process and self._process.pool() is not None:
                 self._process = None
             if not self._check_alive():
-                self._kill_orphaned_server()
-                command = "CLASSPATH=/data/local/tmp/u2.jar app_process / com.wetest.uia2.Main"
-                self._process = RishProcess(self._runner, command)
-                self._wait_ready()
+                self._launch_and_wait(kill_first=False)
 
     def stop_uiautomator(self, wait: bool = True) -> None:
         with self._lock:
@@ -799,6 +796,19 @@ class RishUiautomatorServer:
                 return
             time.sleep(0.5)
         raise LaunchUiAutomationError("server not ready", output_buffer)
+
+    def _launch_and_wait(self, kill_first: bool) -> None:
+        if kill_first:
+            self._kill_orphaned_server()
+        command = "CLASSPATH=/data/local/tmp/u2.jar app_process / com.wetest.uia2.Main"
+        self._process = RishProcess(self._runner, command)
+        try:
+            self._wait_ready()
+        except LaunchUiAutomationError:
+            if kill_first:
+                raise
+            self._kill_orphaned_server()
+            self._launch_and_wait(kill_first=True)
 
     def _kill_orphaned_server(self) -> None:
         self._dev.shell("pkill -f 'com.wetest.uia2.Main' >/dev/null 2>&1 || true")
